@@ -1,5 +1,5 @@
 {
-    "name": "general-interface",
+    "name": "dnd-turn-order",
     "version": "1.0.0",
     "main": "index.js",
     "author": "Markaronin <jmarkroylance@gmail.com>",
