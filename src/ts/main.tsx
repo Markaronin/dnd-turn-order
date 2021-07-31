@@ -3,33 +3,36 @@ import ReactDOM from "react-dom";
 import { Player } from "./Player";
 import { PlayerCard } from "./PlayerCard";
 
-let nextId = 0;
 interface MainDivState {
     players: Record<string, Player>;
     turn: number;
+    nextId: number;
 }
 interface MainDivProps {}
 class MainDiv extends Component<MainDivProps, MainDivState> {
+    private static readonly PlayerStateKey = "playerState";
+    private static readonly DefaultState = '{"players": {}, "turn": 0, "nextId": 0}';
     constructor(props: MainDivProps) {
         super(props);
-        this.state = {
-            players: {},
-            turn: 0,
-        }
+        this.state = JSON.parse(window.localStorage.getItem(MainDiv.PlayerStateKey) || MainDiv.DefaultState);
+    }
+
+    componentDidUpdate() {
+        window.localStorage.setItem(MainDiv.PlayerStateKey, JSON.stringify(this.state));
     }
 
     private handleNewPlayer = (): void => {
         const newPlayers = this.state.players;
-        const id = nextId++;
+        const id = this.state.nextId;
         newPlayers[id] = {
             id,
             initiative: undefined,
             dexterity: undefined,
             name: "",
             heldTurn: false,
-            color: "#ffffff",
+            color: "#222222",
         };
-        this.setState({players: newPlayers})
+        this.setState({players: newPlayers, nextId: id + 1})
     }
 
     render() {

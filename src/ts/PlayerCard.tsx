@@ -1,5 +1,6 @@
 import React, { ChangeEvent, Component } from "react";
 import { Player } from "./Player";
+import { parseColor } from "./util";
 
 interface PlayerCardProps {
     player: Player
@@ -39,21 +40,43 @@ export class PlayerCard extends Component<PlayerCardProps, PlayerCardState> {
     }
 
     render() {
-        const borderColor = this.props.turn ? "gold" : "black"
+        const borderColor = this.props.turn ? "gold" : "rgb(60, 60, 60)";
+        let textColor = "white";
+        if (parseColor(this.props.player.color).reduce((x, y) => x + y, 0) > (255 * 2)) {
+            textColor = "black";
+        }
         return <div style={{
                 border: `3px solid ${borderColor}`,
                 margin: "2px",
                 padding: "5px",
                 borderRadius: "5px",
+                backgroundColor: this.props.player.color,
+                color: textColor,
             }}>
             <input type="text" size={12} onChange={this.handleNameChange} placeholder="Name" value={this.props.player.name} />
             <br />
-            <input type="number" style={{
-                width: "55pt",
-            }} onChange={this.handleInitiativeChange} placeholder="Initiative" value={this.props.player.initiative || ""} />
-            <input type="number" style={{
-                width: "55pt",
-            }} onChange={this.handleDexterityChange} placeholder="Dexterity" value={this.props.player.dexterity || ""} />
+            <input 
+                type="number" 
+                style={{
+                    width: "55pt",
+                }} 
+                onChange={this.handleInitiativeChange} 
+                max="30" 
+                min="0"
+                placeholder="Initiative" 
+                value={this.props.player.initiative || ""} 
+            />
+            <input 
+                type="number" 
+                style={{
+                    width: "55pt",
+                }} 
+                min="0"
+                max="25"
+                onChange={this.handleDexterityChange} 
+                placeholder="DEX" 
+                value={this.props.player.dexterity || ""} 
+            />
             <br />
             <input type="color" onChange={this.handleColorChange} value={this.props.player.color}
                 style={{
