@@ -18,6 +18,13 @@ export class PlayerCard extends Component<PlayerCardProps, PlayerCardState> {
     private handleNameChange = (event: ChangeEvent<HTMLInputElement>): void => {
         this.props.handleChangePlayer({name: event.currentTarget.value});
     }
+    private handleHPChange = (event: ChangeEvent<HTMLInputElement>): void => {
+        let hp = undefined;
+        if (event.currentTarget.value.length > 0) {
+            hp = parseInt(event.currentTarget.value);
+        }
+        this.props.handleChangePlayer({hp});
+    }
     private handleInitiativeChange = (event: ChangeEvent<HTMLInputElement>): void => {
         let initiative = undefined;
         if (event.currentTarget.value.length > 0) {
@@ -61,7 +68,7 @@ export class PlayerCard extends Component<PlayerCardProps, PlayerCardState> {
                     width: "55pt",
                 }} 
                 onChange={this.handleInitiativeChange} 
-                max="30" 
+                max="50" 
                 min="0"
                 placeholder="Initiative" 
                 value={this.props.player.initiative || ""} 
@@ -72,10 +79,22 @@ export class PlayerCard extends Component<PlayerCardProps, PlayerCardState> {
                     width: "55pt",
                 }} 
                 min="0"
-                max="25"
+                max="50"
                 onChange={this.handleDexterityChange} 
                 placeholder="DEX" 
                 value={this.props.player.dexterity || ""} 
+            />
+            <br />
+            <input 
+                type="number" 
+                style={{
+                    width: "110pt",
+                }} 
+                min="0"
+                max="1000"
+                onChange={this.handleHPChange} 
+                placeholder="HP" 
+                value={this.props.player.hp || ""} 
             />
             <br />
             <input type="color" onChange={this.handleColorChange} value={this.props.player.color}

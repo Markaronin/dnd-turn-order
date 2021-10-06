@@ -28,6 +28,7 @@ class MainDiv extends Component<MainDivProps, MainDivState> {
             id,
             initiative: undefined,
             dexterity: undefined,
+            hp: undefined,
             name: "",
             heldTurn: false,
             color: "#222222",
