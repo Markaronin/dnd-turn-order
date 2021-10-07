@@ -1,6 +1,6 @@
 import React, { ChangeEvent, Component } from "react";
-import { UnitData, UnitEncounterData } from "./Unit";
-import { parseColor } from "./util";
+import { UnitData, UnitEncounterData } from "../Unit";
+import { parseColor } from "../util";
 
 interface UnitEncounterCardProps {
     unitData: UnitData;

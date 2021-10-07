@@ -1,7 +1,7 @@
 import React from "react";
 import { Encounter } from "../Encounter";
 import { UnitData, UnitEncounterData } from "../Unit";
-import { UnitEncounterCard } from "../UnitEncounterCard";
+import { UnitEncounterCard } from "./UnitEncounterCard";
 import "./EncounterPage.less";
 
 interface EncounterPageProps {
