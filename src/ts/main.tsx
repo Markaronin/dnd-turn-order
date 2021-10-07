@@ -33,9 +33,9 @@ class MainDiv extends Component<MainDivProps, LatestState> {
                     units={this.state.units}
                     unitEncounterData={this.state.unitEncounterData}
                     getNextUnitId={() => {
-                        const nextId = this.state.nextId;
-                        this.setState({ nextId: nextId + 1 });
-                        return nextId.toString();
+                        const nextUnitId = this.state.nextUnitId;
+                        this.setState({ nextUnitId: nextUnitId + 1 });
+                        return nextUnitId.toString();
                     }}
                     addNewEncounter={() => {
                         const id = this.state.nextEncounterId + 1;

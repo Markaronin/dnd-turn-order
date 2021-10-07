@@ -32,17 +32,30 @@ export interface MainStateV1 {
     currentCategoryId: string;
 }
 
-export type OldState = MainStateV0;
-export type LatestState = MainStateV1;
+export interface MainStateV2 {
+    version: 2;
+    units: Record<string, UnitData>;
+    unitEncounterData: UnitEncounterData[];
+    encounters: Record<string, Encounter>;
+    categories: Record<string, Category>;
+    nextUnitId: number;
+    nextEncounterId: number;
+    nextCategoryId: number;
+    currentEncounterId: string;
+    currentCategoryId: string;
+}
+
+export type OldState = MainStateV0 | MainStateV1;
+export type LatestState = MainStateV2;
 
 export class StateVersionHandler {
     public static readonly DefaultState: LatestState = {
-        version: 1,
+        version: 2,
         units: {},
         unitEncounterData: [],
         encounters: { "0": { id: "0", name: "Default Encounter", turn: 0 } },
         categories: { "0": { id: "0", name: "Default Category" } },
-        nextId: 0,
+        nextUnitId: 0,
         nextEncounterId: 1,
         nextCategoryId: 1,
         currentEncounterId: "0",
@@ -82,12 +95,29 @@ export class StateVersionHandler {
             currentCategoryId: "0",
         };
     }
+    private updateV1ToV2(oldState: MainStateV1): MainStateV2 {
+        return {
+            version: 2,
+            units: oldState.units,
+            unitEncounterData: oldState.unitEncounterData,
+            encounters: oldState.encounters,
+            categories: oldState.encounters,
+            nextUnitId: oldState.nextId,
+            nextEncounterId: oldState.nextEncounterId,
+            nextCategoryId: oldState.nextCategoryId,
+            currentEncounterId: oldState.currentEncounterId,
+            currentCategoryId: oldState.currentCategoryId,
+        };
+    }
 
     public update(oldState: OldState): LatestState {
-        // if (!("version" in oldState)) {
-        //     return this.updateV0ToV1(oldState);
-        // }
-        return this.updateV0ToV1(oldState);
+        if (!("version" in oldState)) {
+            oldState = this.updateV0ToV1(oldState);
+        }
+        if ("version" in oldState && oldState.version === 1) {
+            return this.updateV1ToV2(oldState);
+        }
+        throw new Error("Uh oh, how did we end up here");
     }
 }
 
