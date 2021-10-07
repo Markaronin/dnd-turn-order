@@ -112,7 +112,7 @@ export const EncounterPage = ({
                                 }
                                 newEncounters[currentEncounterId].turn =
                                     newEncounters[currentEncounterId].turn <
-                                    unitEncounterData.filter(
+                                    newEncounterDataArray.filter(
                                         (encounterData) => encounterData.encounterId == currentEncounterId,
                                     ).length
                                         ? newEncounters[currentEncounterId].turn
