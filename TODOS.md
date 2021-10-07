@@ -1,0 +1,5 @@
+- Add ability to rename encounters
+- Add ability to remove encounters
+- Add page for unit data
+- Add method to add unit to encounter (either drag and drop, or a button)
+- Save user data

@@ -1,90 +1,64 @@
 import React, { Component, createElement } from "react";
 import ReactDOM from "react-dom";
-import { Player } from "./Player";
-import { PlayerCard } from "./PlayerCard";
+import { Encounter } from "./Encounter";
+import { EncounterPage } from "./encounterpage/EncounterPage";
+import { LatestState, StateVersionHandler, stateVersionHandler } from "./StateVersionHandler";
+import { UnitData, UnitEncounterData } from "./Unit";
 
-interface MainDivState {
-    players: Record<string, Player>;
-    turn: number;
-    nextId: number;
-}
 interface MainDivProps {}
-class MainDiv extends Component<MainDivProps, MainDivState> {
+class MainDiv extends Component<MainDivProps, LatestState> {
     private static readonly PlayerStateKey = "playerState";
-    private static readonly DefaultState = '{"players": {}, "turn": 0, "nextId": 0}';
     constructor(props: MainDivProps) {
         super(props);
-        this.state = JSON.parse(window.localStorage.getItem(MainDiv.PlayerStateKey) || MainDiv.DefaultState);
+        const loadedState = JSON.parse(
+            window.localStorage.getItem(MainDiv.PlayerStateKey) || StateVersionHandler.DefaultStateString,
+        );
+        if (loadedState.version !== StateVersionHandler.DefaultState.version) {
+            this.state = stateVersionHandler.update(loadedState);
+        } else {
+            this.state = loadedState;
+        }
     }
 
     componentDidUpdate() {
         window.localStorage.setItem(MainDiv.PlayerStateKey, JSON.stringify(this.state));
     }
 
-    private handleNewPlayer = (): void => {
-        const newPlayers = this.state.players;
-        const id = this.state.nextId;
-        newPlayers[id] = {
-            id,
-            initiative: undefined,
-            dexterity: undefined,
-            hp: undefined,
-            name: "",
-            heldTurn: false,
-            color: "#222222",
-        };
-        this.setState({ players: newPlayers, nextId: id + 1 });
-    };
-
     render() {
         return (
             <div style={{ width: "100%" }}>
-                <div style={{ display: "flex", flexWrap: "wrap", width: "100%" }}>
-                    {Object.entries(this.state.players)
-                        .sort((a, b) => {
-                            if (a[1].initiative === b[1].initiative) {
-                                return (b[1].dexterity || 0) - (a[1].dexterity || 0);
-                            } else {
-                                return (b[1].initiative || 0) - (a[1].initiative || 0);
-                            }
-                        })
-                        .map((player, i) => (
-                            <PlayerCard
-                                player={player[1]}
-                                key={player[0]}
-                                turn={this.state.turn == i}
-                                handleChangePlayer={(playerInfo: Partial<Player>) => {
-                                    const newPlayers = this.state.players;
-                                    newPlayers[player[0]] = { ...newPlayers[player[0]], ...playerInfo };
-                                    this.setState({ players: newPlayers });
-                                }}
-                                handleDeletePlayer={() => {
-                                    const newPlayers = this.state.players;
-                                    delete newPlayers[player[0]];
-                                    this.setState({
-                                        players: newPlayers,
-                                        turn:
-                                            this.state.turn < Object.values(this.state.players).length
-                                                ? this.state.turn
-                                                : 0,
-                                    });
-                                }}
-                            />
-                        ))}
-                </div>
-                <button onClick={this.handleNewPlayer} id="newPlayerButton">
-                    Add New
-                </button>
-                {Object.values(this.state.players).length > 0 && (
-                    <button
-                        onClick={() =>
-                            this.setState({ turn: (this.state.turn + 1) % Object.values(this.state.players).length })
-                        }
-                        id="nextTurnButton"
-                    >
-                        Next Turn
-                    </button>
-                )}
+                <EncounterPage
+                    encounters={this.state.encounters}
+                    currentEncounterId={this.state.currentEncounterId}
+                    units={this.state.units}
+                    unitEncounterData={this.state.unitEncounterData}
+                    getNextUnitId={() => {
+                        const nextId = this.state.nextId;
+                        this.setState({ nextId: nextId + 1 });
+                        return nextId.toString();
+                    }}
+                    addNewEncounter={() => {
+                        const id = this.state.nextEncounterId + 1;
+                        const newEncounter: Encounter = {
+                            id: id.toString(),
+                            name: "New Encounter",
+                            turn: 0,
+                        };
+                        const newEncounters = this.state.encounters;
+                        newEncounters[id.toString()] = newEncounter;
+                        this.setState({
+                            nextEncounterId: id,
+                            encounters: newEncounters,
+                            currentEncounterId: id.toString(),
+                        });
+                    }}
+                    changeEncounter={(newEncounterId: string) => this.setState({ currentEncounterId: newEncounterId })}
+                    changeUnitEncounterData={(unitEncounterData: UnitEncounterData[]) =>
+                        this.setState({ unitEncounterData })
+                    }
+                    changeUnits={(units: Record<string, UnitData>) => this.setState({ units })}
+                    changeEncounters={(encounters: Record<string, Encounter>) => this.setState({ encounters })}
+                />
             </div>
         );
     }
