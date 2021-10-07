@@ -1,5 +1,3 @@
-import { Category } from "./Category";
-import { Encounter } from "./Encounter";
 import { UnitData, UnitEncounterData } from "./Unit";
 
 interface MainStateV0 {
@@ -21,10 +19,38 @@ interface MainStateV0 {
 
 export interface MainStateV1 {
     version: 1;
-    units: Record<string, UnitData>;
-    unitEncounterData: UnitEncounterData[];
-    encounters: Record<string, Encounter>;
-    categories: Record<string, Category>;
+    units: Record<
+        string,
+        {
+            id: string;
+            dexterity: number | undefined;
+            name: string;
+            color: string;
+            categoryId: string | undefined;
+        }
+    >;
+    unitEncounterData: {
+        unitId: string;
+        initiative: number | undefined;
+        hp: number | undefined;
+        heldTurn: boolean;
+        encounterId: string;
+    }[];
+    encounters: Record<
+        string,
+        {
+            id: string;
+            name: string;
+            turn: number;
+        }
+    >;
+    categories: Record<
+        string,
+        {
+            id: string;
+            name: string;
+        }
+    >;
     nextId: number;
     nextEncounterId: number;
     nextCategoryId: number;
@@ -34,16 +60,46 @@ export interface MainStateV1 {
 
 export interface MainStateV2 {
     version: 2;
-    units: Record<string, UnitData>;
-    unitEncounterData: UnitEncounterData[];
-    encounters: Record<string, Encounter>;
-    categories: Record<string, Category>;
+    units: Record<
+        string,
+        {
+            id: string;
+            dexterity: number | undefined;
+            name: string;
+            color: string;
+            categoryId: string | undefined;
+        }
+    >;
+    unitEncounterData: {
+        unitId: string;
+        initiative: number | undefined;
+        hp: number | undefined;
+        heldTurn: boolean;
+        encounterId: string;
+    }[];
+    encounters: Record<
+        string,
+        {
+            id: string;
+            name: string;
+            turn: number;
+        }
+    >;
+    categories: Record<
+        string,
+        {
+            id: string;
+            name: string;
+        }
+    >;
     nextUnitId: number;
     nextEncounterId: number;
     nextCategoryId: number;
     currentEncounterId: string;
     currentCategoryId: string;
 }
+
+// Remember not to use interface types in state versions - it's too easy to make a change to the UnitData type and forget to make a new state version
 
 export type OldState = MainStateV0 | MainStateV1;
 export type LatestState = MainStateV2;
