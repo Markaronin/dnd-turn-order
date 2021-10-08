@@ -73,7 +73,7 @@ class MainDiv extends Component<MainDivProps, LatestState> {
                                 currentEncounterId: id.toString(),
                             });
                         }}
-                        changeEncounter={(newEncounterId: string) =>
+                        changeCurrentEncounterId={(newEncounterId: string) =>
                             this.setState({ currentEncounterId: newEncounterId })
                         }
                         changeUnitEncounterData={(unitEncounterData: Record<string, UnitEncounterData>) =>

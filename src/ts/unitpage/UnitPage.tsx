@@ -32,7 +32,7 @@ export const UnitPage = ({
     return (
         <div>
             <NavTabs
-                name="unit"
+                name="category"
                 tabs={Object.values(categories)}
                 currentTabId={currentCategoryId}
                 changeTab={changeCategoryId}
@@ -69,6 +69,24 @@ export const UnitPage = ({
                 ))}
             <hr />
             Buttons
+            <br />
+            <br />
+            {Object.keys(categories).length > 1 && (
+                <button
+                    onClick={() => {
+                        Object.values(units)
+                            .filter((unit) => unit.categoryId == currentCategoryId)
+                            .map((unit) => unit.id)
+                            .forEach((unitId) => deleteUnit(unitId));
+                        const newCategories = categories;
+                        delete newCategories[currentCategoryId];
+                        changeCategoryId(Object.values(newCategories)[0].id);
+                        changeCategories(newCategories);
+                    }}
+                >
+                    Delete Encounter
+                </button>
+            )}
         </div>
     );
 };

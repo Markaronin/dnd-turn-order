@@ -3,6 +3,7 @@ import { Encounter } from "../Encounter";
 import { UnitData, UnitEncounterData } from "../Unit";
 import { UnitEncounterCard } from "./UnitEncounterCard";
 import "./EncounterPage.less";
+import { NavTabs } from "../navtabs/NavTabs";
 
 interface EncounterPageProps {
     encounters: Record<string, Encounter>;
@@ -12,7 +13,7 @@ interface EncounterPageProps {
     getNextUnitId: () => string;
     getNextUnitEncounterDataId: () => string;
     addNewEncounter: () => void;
-    changeEncounter: (newEncounterId: string) => void;
+    changeCurrentEncounterId: (newEncounterId: string) => void;
     changeUnitEncounterData: (newUnitEncounterData: Record<string, UnitEncounterData>) => void;
     changeUnits: (newUnits: Record<string, UnitData>) => void;
     changeEncounters: (newEncounters: Record<string, Encounter>) => void;
@@ -27,7 +28,7 @@ export const EncounterPage = ({
     getNextUnitId,
     getNextUnitEncounterDataId,
     addNewEncounter,
-    changeEncounter,
+    changeCurrentEncounterId: changeEncounter,
     changeUnitEncounterData,
     changeUnits,
     changeEncounters,
@@ -57,26 +58,35 @@ export const EncounterPage = ({
         changeUnitEncounterData(newUnitEncounterData);
     };
 
+    const handleDeleteEncounterUnitData = (encounterDataUnitId: string) => {
+        const newUnitEncounterData = unitEncounterData;
+        const newUnits = units;
+        const newEncounters = encounters;
+        if (units[unitEncounterData[encounterDataUnitId].unitId].categoryId === undefined) {
+            delete newUnits[unitEncounterData[encounterDataUnitId].unitId];
+        }
+        delete newUnitEncounterData[encounterDataUnitId];
+        newEncounters[currentEncounterId].turn =
+            newEncounters[currentEncounterId].turn <
+            Object.values(newUnitEncounterData).filter(
+                (encounterData) => encounterData.encounterId == currentEncounterId,
+            ).length
+                ? newEncounters[currentEncounterId].turn
+                : 0;
+        changeUnitEncounterData(newUnitEncounterData);
+        changeUnits(newUnits);
+        changeEncounters(newEncounters);
+    };
+
     return (
         <div>
-            <div>
-                {Object.values(encounters).map((encounter) => (
-                    <button
-                        key={encounter.id}
-                        className={
-                            currentEncounterId === encounter.id
-                                ? "changeEncounterButton active"
-                                : "changeEncounterButton"
-                        }
-                        onClick={() => changeEncounter(encounter.id)}
-                    >
-                        {encounter.name}
-                    </button>
-                ))}
-                <button onClick={addNewEncounter} className="addNewEncounterButton">
-                    Add New Encounter
-                </button>
-            </div>
+            <NavTabs
+                name="encounter"
+                tabs={Object.values(encounters)}
+                currentTabId={currentEncounterId}
+                changeTab={changeEncounter}
+                addNewTab={addNewEncounter}
+            />
             <hr />
             <div style={{ display: "flex", flexWrap: "wrap", width: "100%" }}>
                 {Object.values(unitEncounterData)
@@ -112,25 +122,7 @@ export const EncounterPage = ({
                                 };
                                 changeUnits(newUnits);
                             }}
-                            handleDeleteEncounterData={() => {
-                                const newUnitEncounterData = unitEncounterData;
-                                const newUnits = units;
-                                const newEncounters = encounters;
-                                if (units[encounterData.unitId].categoryId === undefined) {
-                                    delete newUnits[encounterData.unitId];
-                                }
-                                delete newUnitEncounterData[encounterData.id];
-                                newEncounters[currentEncounterId].turn =
-                                    newEncounters[currentEncounterId].turn <
-                                    Object.values(newUnitEncounterData).filter(
-                                        (encounterData) => encounterData.encounterId == currentEncounterId,
-                                    ).length
-                                        ? newEncounters[currentEncounterId].turn
-                                        : 0;
-                                changeUnitEncounterData(newUnitEncounterData);
-                                changeUnits(newUnits);
-                                changeEncounters(newEncounters);
-                            }}
+                            handleDeleteEncounterUnitData={() => handleDeleteEncounterUnitData(encounterData.id)}
                             handleSaveUnit={saveUnit}
                         />
                     ))}
@@ -153,6 +145,24 @@ export const EncounterPage = ({
                     id="nextTurnButton"
                 >
                     Next Turn
+                </button>
+            )}
+            <br />
+            <br />
+            {Object.keys(encounters).length > 1 && (
+                <button
+                    onClick={() => {
+                        Object.values(unitEncounterData)
+                            .filter((encounterData) => encounterData.encounterId == currentEncounterId)
+                            .map((encounterData) => encounterData.id)
+                            .forEach((encounterUnitDataId) => handleDeleteEncounterUnitData(encounterUnitDataId));
+                        const newEncounters = encounters;
+                        delete newEncounters[currentEncounterId];
+                        changeEncounter(Object.values(newEncounters)[0].id);
+                        changeEncounters(newEncounters);
+                    }}
+                >
+                    Delete Encounter
                 </button>
             )}
         </div>

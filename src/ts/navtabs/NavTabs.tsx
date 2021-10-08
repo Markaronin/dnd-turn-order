@@ -1,4 +1,5 @@
 import React from "react";
+import "./NavTabs.less";
 
 interface NavTabsProps {
     name: string;
@@ -21,7 +22,7 @@ export const NavTabs = ({ name, tabs, currentTabId, changeTab, addNewTab }: NavT
                 </button>
             ))}
             <button onClick={addNewTab} className="addNewTabButton">
-                Add New {name.toLocaleUpperCase()}
+                Add new {name}
             </button>
         </div>
     );
