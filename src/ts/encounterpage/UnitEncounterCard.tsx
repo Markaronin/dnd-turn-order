@@ -8,6 +8,7 @@ interface UnitEncounterCardProps {
     handleChangeEncounterData: (newEncounterData: Partial<Omit<UnitEncounterData, "unitId">>) => void;
     handleChangeUnitData: (newUnitData: Partial<Omit<UnitData, "id">>) => void;
     handleDeleteEncounterData: () => void;
+    handleSaveUnit: (unitId: string) => void;
     myTurn: boolean;
 }
 interface UnitEncounterCardState {}
@@ -128,6 +129,7 @@ export class UnitEncounterCard extends Component<UnitEncounterCardProps, UnitEnc
                     checked={this.props.unitEncounterData.heldTurn}
                 />
                 <br />
+                <button onClick={() => this.props.handleSaveUnit(this.props.unitData.id)}>Save</button>
                 <button onClick={this.props.handleDeleteEncounterData}>Delete</button>
             </div>
         );

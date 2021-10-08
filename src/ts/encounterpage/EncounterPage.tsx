@@ -8,13 +8,15 @@ interface EncounterPageProps {
     encounters: Record<string, Encounter>;
     currentEncounterId: string;
     units: Record<string, UnitData>;
-    unitEncounterData: UnitEncounterData[];
+    unitEncounterData: Record<string, UnitEncounterData>;
     getNextUnitId: () => string;
+    getNextUnitEncounterDataId: () => string;
     addNewEncounter: () => void;
     changeEncounter: (newEncounterId: string) => void;
-    changeUnitEncounterData: (newUnitEncounterData: UnitEncounterData[]) => void;
+    changeUnitEncounterData: (newUnitEncounterData: Record<string, UnitEncounterData>) => void;
     changeUnits: (newUnits: Record<string, UnitData>) => void;
     changeEncounters: (newEncounters: Record<string, Encounter>) => void;
+    saveUnit: (unitId: string) => void;
 }
 
 export const EncounterPage = ({
@@ -23,11 +25,13 @@ export const EncounterPage = ({
     unitEncounterData,
     units,
     getNextUnitId,
+    getNextUnitEncounterDataId,
     addNewEncounter,
     changeEncounter,
     changeUnitEncounterData,
     changeUnits,
     changeEncounters,
+    saveUnit,
 }: EncounterPageProps): JSX.Element => {
     const handleNewUnitAndEncounter = (): void => {
         const newUnits = units;
@@ -40,13 +44,15 @@ export const EncounterPage = ({
             categoryId: undefined,
         };
         const newUnitEncounterData = unitEncounterData;
-        newUnitEncounterData.push({
+        const unitEncounterDataId = getNextUnitEncounterDataId();
+        newUnitEncounterData[unitEncounterDataId] = {
+            id: unitEncounterDataId,
             unitId: unitId,
             encounterId: currentEncounterId,
             heldTurn: false,
             hp: undefined,
             initiative: undefined,
-        });
+        };
         changeUnits(newUnits);
         changeUnitEncounterData(newUnitEncounterData);
     };
@@ -59,7 +65,7 @@ export const EncounterPage = ({
                         key={encounter.id}
                         className={
                             currentEncounterId === encounter.id
-                                ? "changeEncounterButton currentEncounter"
+                                ? "changeEncounterButton active"
                                 : "changeEncounterButton"
                         }
                         onClick={() => changeEncounter(encounter.id)}
@@ -73,7 +79,7 @@ export const EncounterPage = ({
             </div>
             <hr />
             <div style={{ display: "flex", flexWrap: "wrap", width: "100%" }}>
-                {unitEncounterData
+                {Object.values(unitEncounterData)
                     .filter((encounterData) => encounterData.encounterId == currentEncounterId)
                     .sort((a, b) => {
                         if (a.initiative === b.initiative) {
@@ -86,14 +92,17 @@ export const EncounterPage = ({
                         <UnitEncounterCard
                             unitData={units[encounterData.unitId]}
                             unitEncounterData={encounterData}
-                            key={encounterData.unitId}
+                            key={encounterData.id}
                             myTurn={encounters[currentEncounterId].turn == i}
                             handleChangeEncounterData={(
-                                newEncounterData: Partial<Omit<UnitEncounterData, "unitId">>,
+                                newEncounterData: Partial<Omit<Omit<UnitEncounterData, "id">, "unitId">>,
                             ) => {
-                                const newEncounterDataArray = unitEncounterData;
-                                newEncounterDataArray[i] = { ...newEncounterDataArray[i], ...newEncounterData };
-                                changeUnitEncounterData(newEncounterDataArray);
+                                const newUnitEncounterData = unitEncounterData;
+                                newUnitEncounterData[encounterData.id] = {
+                                    ...newUnitEncounterData[encounterData.id],
+                                    ...newEncounterData,
+                                };
+                                changeUnitEncounterData(newUnitEncounterData);
                             }}
                             handleChangeUnitData={(newUnitData: Partial<Omit<UnitData, "id">>) => {
                                 const newUnits = units;
@@ -104,23 +113,25 @@ export const EncounterPage = ({
                                 changeUnits(newUnits);
                             }}
                             handleDeleteEncounterData={() => {
-                                const newEncounterDataArray = unitEncounterData.filter((val) => val != encounterData);
+                                const newUnitEncounterData = unitEncounterData;
                                 const newUnits = units;
                                 const newEncounters = encounters;
                                 if (units[encounterData.unitId].categoryId === undefined) {
                                     delete newUnits[encounterData.unitId];
                                 }
+                                delete newUnitEncounterData[encounterData.id];
                                 newEncounters[currentEncounterId].turn =
                                     newEncounters[currentEncounterId].turn <
-                                    newEncounterDataArray.filter(
+                                    Object.values(newUnitEncounterData).filter(
                                         (encounterData) => encounterData.encounterId == currentEncounterId,
                                     ).length
                                         ? newEncounters[currentEncounterId].turn
                                         : 0;
-                                changeUnitEncounterData(newEncounterDataArray);
+                                changeUnitEncounterData(newUnitEncounterData);
                                 changeUnits(newUnits);
                                 changeEncounters(newEncounters);
                             }}
+                            handleSaveUnit={saveUnit}
                         />
                     ))}
             </div>
@@ -128,14 +139,15 @@ export const EncounterPage = ({
             <button onClick={handleNewUnitAndEncounter} id="newUnitButton">
                 Add New
             </button>
-            {unitEncounterData.length > 0 && (
+            {Object.keys(unitEncounterData).length > 0 && (
                 <button
                     onClick={() => {
                         const newEncounters = encounters;
                         newEncounters[currentEncounterId].turn =
                             (newEncounters[currentEncounterId].turn + 1) %
-                            unitEncounterData.filter((encounterData) => encounterData.encounterId == currentEncounterId)
-                                .length;
+                            Object.values(unitEncounterData).filter(
+                                (encounterData) => encounterData.encounterId == currentEncounterId,
+                            ).length;
                         changeEncounters(newEncounters);
                     }}
                     id="nextTurnButton"

@@ -7,6 +7,7 @@ export interface UnitData {
 }
 
 export interface UnitEncounterData {
+    id: string;
     unitId: string;
     initiative: number | undefined;
     hp: number | undefined;
