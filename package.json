@@ -29,5 +29,8 @@
   },
   "scripts": {
     "dev": "yarn && npx webpack serve"
+  },
+  "dependencies": {
+    "@markaronin/jefferson-util": "^1.0.2"
   }
 }
