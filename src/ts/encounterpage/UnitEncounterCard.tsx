@@ -129,7 +129,9 @@ export class UnitEncounterCard extends Component<UnitEncounterCardProps, UnitEnc
                     checked={this.props.unitEncounterData.heldTurn}
                 />
                 <br />
-                <button onClick={() => this.props.handleSaveUnit(this.props.unitData.id)}>Save</button>
+                {this.props.unitData.categoryId === undefined && (
+                    <button onClick={() => this.props.handleSaveUnit(this.props.unitData.id)}>Save</button>
+                )}
                 <button onClick={this.props.handleDeleteEncounterUnitData}>Delete</button>
             </div>
         );

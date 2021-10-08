@@ -73,7 +73,23 @@ export const UnitPage = ({
                     />
                 ))}
             <hr />
-            Buttons
+            <button
+                onClick={() => {
+                    const id = getNextUnitId();
+                    const newUnit: UnitData = {
+                        id,
+                        name: "",
+                        dexterity: undefined,
+                        color: "#222222",
+                        categoryId: currentCategoryId,
+                    };
+                    const newUnits = units;
+                    newUnits[id] = newUnit;
+                    changeUnits(newUnits);
+                }}
+            >
+                Add Unit
+            </button>
             <br />
             <br />
             {Object.keys(categories).length > 1 && (
