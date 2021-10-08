@@ -1,4 +1,5 @@
 import React from "react";
+import { NavTab } from "./NavTab";
 import "./NavTabs.less";
 
 interface NavTabsProps {
@@ -7,19 +8,20 @@ interface NavTabsProps {
     currentTabId: string;
     changeTab: (newId: string) => void;
     addNewTab: () => void;
+    editTabName: (id: string, newName: string) => void;
 }
 
-export const NavTabs = ({ name, tabs, currentTabId, changeTab, addNewTab }: NavTabsProps): JSX.Element => {
+export const NavTabs = ({ name, tabs, currentTabId, changeTab, addNewTab, editTabName }: NavTabsProps): JSX.Element => {
     return (
-        <div>
+        <div className="navTabs">
             {tabs.map((tab) => (
-                <button
+                <NavTab
                     key={tab.id}
-                    className={currentTabId === tab.id ? "tabButton active" : "tabButton"}
-                    onClick={() => changeTab(tab.id)}
-                >
-                    {tab.name}
-                </button>
+                    active={currentTabId === tab.id}
+                    name={tab.name}
+                    changeName={(newName: string) => editTabName(tab.id, newName)}
+                    focusTab={() => changeTab(tab.id)}
+                />
             ))}
             <button onClick={addNewTab} className="addNewTabButton">
                 Add new {name}

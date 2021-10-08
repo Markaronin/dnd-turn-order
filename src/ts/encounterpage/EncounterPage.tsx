@@ -86,6 +86,11 @@ export const EncounterPage = ({
                 currentTabId={currentEncounterId}
                 changeTab={changeEncounter}
                 addNewTab={addNewEncounter}
+                editTabName={(id: string, newName: string) => {
+                    const newEncounters = encounters;
+                    newEncounters[id] = { ...newEncounters[id], name: newName };
+                    changeEncounters(newEncounters);
+                }}
             />
             <hr />
             <div style={{ display: "flex", flexWrap: "wrap", width: "100%" }}>

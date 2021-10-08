@@ -47,6 +47,11 @@ export const UnitPage = ({
                     changeCategories(newCategories);
                     changeCategoryId(id);
                 }}
+                editTabName={(id: string, newName: string) => {
+                    const newCategories = categories;
+                    newCategories[id] = { ...newCategories[id], name: newName };
+                    changeCategories(newCategories);
+                }}
             />
             <hr />
             {Object.values(units)
