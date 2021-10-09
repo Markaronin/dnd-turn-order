@@ -258,6 +258,9 @@ export class StateVersionHandler {
     }
 
     public update(oldState: OldState): LatestState {
+        if (typeof oldState !== "object" || (!("version" in oldState) && !("players" in oldState))) {
+            return StateVersionHandler.DefaultState;
+        }
         if (!("version" in oldState)) {
             oldState = this.updateV0ToV1(oldState);
         }

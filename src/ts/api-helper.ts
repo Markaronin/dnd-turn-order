@@ -1,30 +1,18 @@
-import { notUndefined } from "../../node_modules/@markaronin/jefferson-util/dist/index";
+import { getCookie, notUndefined } from "../../node_modules/@markaronin/jefferson-util/dist/index";
 
 interface UnsuccessfulRequest {
     success: false;
 }
 
-export function getCookie(cname: string): string | undefined {
-    const name = cname + "=";
-    const decodedCookie = decodeURIComponent(document.cookie);
-    const ca = decodedCookie.split(";");
-    for (let i = 0; i < ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) == " ") {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) == 0) {
-            return c.substring(name.length, c.length);
-        }
-    }
-    return undefined;
-}
-
 export class APIHelper {
-    private static readonly baseUrl = "https://m83obq436a.execute-api.us-east-1.amazonaws.com/prod";
+    private static readonly baseUrl = "https://api.dnd-turn-order.markaronin.com";
 
     public static getData(): Promise<UnsuccessfulRequest | { success: true; body: string }> {
         return APIHelper.jsonGetRequest("data");
+    }
+
+    public static putData(body: unknown): Promise<UnsuccessfulRequest | { success: true }> {
+        return APIHelper.jsonPutRequest("data", body);
     }
 
     // public static login(body: {usernameOrEmail: string, password: string}): Promise<UnsuccessfulRequest | {success: true, valid: false} | {success: true, valid: true, cookies: string[]}> {

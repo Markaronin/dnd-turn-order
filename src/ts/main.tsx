@@ -1,29 +1,30 @@
 import React, { Component, createElement } from "react";
 import ReactDOM from "react-dom";
+import { APIHelper } from "./api-helper";
 import { Category } from "./Category";
 import { Encounter } from "./Encounter";
 import { EncounterPage } from "./encounterpage/EncounterPage";
 import { LatestState, StateVersionHandler, stateVersionHandler } from "./StateVersionHandler";
 import { UnitData, UnitEncounterData } from "./Unit";
 import { UnitPage } from "./unitpage/UnitPage";
+import { getCookie } from "../../node_modules/@markaronin/jefferson-util/dist/index";
 
-interface MainDivProps {}
+interface MainDivProps {
+    state: LatestState;
+}
 class MainDiv extends Component<MainDivProps, LatestState> {
     private static readonly PlayerStateKey = "playerState";
     constructor(props: MainDivProps) {
         super(props);
-        const loadedState = JSON.parse(
-            window.localStorage.getItem(MainDiv.PlayerStateKey) || StateVersionHandler.DefaultStateString,
-        );
-        if (loadedState.version !== StateVersionHandler.DefaultState.version) {
-            this.state = stateVersionHandler.update(loadedState);
-        } else {
-            this.state = loadedState;
-        }
+        this.state = props.state;
     }
 
+    private timeoutId?: number;
     componentDidUpdate() {
-        window.localStorage.setItem(MainDiv.PlayerStateKey, JSON.stringify(this.state));
+        window.clearTimeout(this.timeoutId);
+        this.timeoutId = window.setTimeout(() => {
+            APIHelper.putData(this.state);
+        }, 5000);
     }
 
     private getNextUnitId = () => {
@@ -133,5 +134,31 @@ class MainDiv extends Component<MainDivProps, LatestState> {
     }
 }
 
-const domContainer = document.querySelector("#reactDom");
-ReactDOM.render(createElement(MainDiv), domContainer);
+// TODO - handle no auth cookie
+const authCookie = getCookie("Auth");
+if (authCookie !== undefined) {
+    APIHelper.getData().then(async (data) => {
+        let state: LatestState;
+        const localState = window.localStorage.getItem("playerState");
+        if (localState) {
+            state = JSON.parse(localState);
+            if (state.version !== StateVersionHandler.DefaultState.version) {
+                state = stateVersionHandler.update(JSON.parse(localState));
+            }
+            await APIHelper.putData(state);
+            window.localStorage.removeItem("playerState");
+        } else if (data.success && data.body.length > 0) {
+            state = JSON.parse(data.body);
+            if (state.version !== StateVersionHandler.DefaultState.version) {
+                state = stateVersionHandler.update(JSON.parse(data.body));
+            }
+        } else {
+            state = StateVersionHandler.DefaultState;
+        }
+
+        const domContainer = document.querySelector("#reactDom");
+        ReactDOM.render(createElement(MainDiv, { state }), domContainer);
+    });
+} else {
+    window.location.replace(`https://auth.markaronin.com?redirect=${encodeURIComponent(window.location.href)}`);
+}
