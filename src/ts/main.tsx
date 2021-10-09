@@ -8,6 +8,7 @@ import { LatestState, StateVersionHandler, stateVersionHandler } from "./StateVe
 import { UnitData, UnitEncounterData } from "./Unit";
 import { UnitPage } from "./unitpage/UnitPage";
 import { getCookie } from "../../node_modules/@markaronin/jefferson-util/dist/index";
+import { SaveIndicator } from "./saveindicator/SaveIndicator";
 
 interface MainDivProps {
     state: LatestState;
@@ -17,14 +18,6 @@ class MainDiv extends Component<MainDivProps, LatestState> {
     constructor(props: MainDivProps) {
         super(props);
         this.state = props.state;
-    }
-
-    private timeoutId?: number;
-    componentDidUpdate() {
-        window.clearTimeout(this.timeoutId);
-        this.timeoutId = window.setTimeout(() => {
-            APIHelper.putData(this.state);
-        }, 5000);
     }
 
     private getNextUnitId = () => {
@@ -50,91 +43,93 @@ class MainDiv extends Component<MainDivProps, LatestState> {
 
     render() {
         return (
-            <div style={{ display: "flex", flexWrap: "nowrap", width: "100%" }}>
-                <div style={{ flexGrow: 2, flexBasis: 1, marginRight: "1ch" }}>
-                    <EncounterPage
-                        encounters={this.state.encounters}
-                        currentEncounterId={this.state.currentEncounterId}
-                        units={this.state.units}
-                        unitEncounterData={this.state.unitEncounterData}
-                        getNextUnitId={this.getNextUnitId}
-                        getNextUnitEncounterDataId={this.getNextUnitEncounterDataId}
-                        addNewEncounter={() => {
-                            const id = this.state.nextEncounterId + 1;
-                            const newEncounter: Encounter = {
-                                id: id.toString(),
-                                name: "New Encounter",
-                                turn: 0,
-                            };
-                            const newEncounters = this.state.encounters;
-                            newEncounters[id.toString()] = newEncounter;
-                            this.setState({
-                                nextEncounterId: id,
-                                encounters: newEncounters,
-                                currentEncounterId: id.toString(),
-                            });
-                        }}
-                        changeCurrentEncounterId={(newEncounterId: string) =>
-                            this.setState({ currentEncounterId: newEncounterId })
-                        }
-                        changeUnitEncounterData={(unitEncounterData: Record<string, UnitEncounterData>) =>
-                            this.setState({ unitEncounterData })
-                        }
-                        changeUnits={(units: Record<string, UnitData>) => this.setState({ units })}
-                        changeEncounters={(encounters: Record<string, Encounter>) => this.setState({ encounters })}
-                        saveUnit={(unitId: string) => {
-                            const newUnits = this.state.units;
-                            newUnits[unitId].categoryId = this.state.currentCategoryId;
-                            this.setState({ units: newUnits });
-                        }}
-                    />
-                </div>
-                <div style={{ flexGrow: 1, flexBasis: 1 }}>
-                    <UnitPage
-                        categories={this.state.categories}
-                        currentCategoryId={this.state.currentCategoryId}
-                        units={this.state.units}
-                        getNextUnitId={this.getNextUnitId}
-                        getNextCategoryId={this.getNextCategoryId}
-                        changeCategoryId={(newCategoryId: string) =>
-                            this.setState({ currentCategoryId: newCategoryId })
-                        }
-                        changeUnits={(units: Record<string, UnitData>) => this.setState({ units })}
-                        changeCategories={(categories: Record<string, Category>) => this.setState({ categories })}
-                        deleteUnit={(unitId: string) => {
-                            const newUnitEncounterData = this.state.unitEncounterData;
-                            Object.keys(newUnitEncounterData)
-                                .filter(
-                                    (unitEncounterDataId) =>
-                                        newUnitEncounterData[unitEncounterDataId].unitId === unitId,
-                                )
-                                .forEach((unitEncounterDataId) => delete newUnitEncounterData[unitEncounterDataId]);
-                            const newUnits = this.state.units;
-                            delete newUnits[unitId];
-                            this.setState({ units: newUnits, unitEncounterData: newUnitEncounterData });
-                        }}
-                        addUnitToEncounter={(unitId: string) => {
-                            const newEncounterData: UnitEncounterData = {
-                                id: this.getNextUnitEncounterDataId(),
-                                unitId,
-                                encounterId: this.state.currentEncounterId,
-                                heldTurn: false,
-                                initiative: undefined,
-                                hp: undefined,
-                            };
-                            const newUnitEncounterData = this.state.unitEncounterData;
-                            newUnitEncounterData[newEncounterData.id] = newEncounterData;
+            <div>
+                <div style={{ display: "flex", flexWrap: "nowrap", width: "100%" }}>
+                    <div style={{ flexGrow: 2, flexBasis: 1, marginRight: "1ch" }}>
+                        <EncounterPage
+                            encounters={this.state.encounters}
+                            currentEncounterId={this.state.currentEncounterId}
+                            units={this.state.units}
+                            unitEncounterData={this.state.unitEncounterData}
+                            getNextUnitId={this.getNextUnitId}
+                            getNextUnitEncounterDataId={this.getNextUnitEncounterDataId}
+                            addNewEncounter={() => {
+                                const id = this.state.nextEncounterId + 1;
+                                const newEncounter: Encounter = {
+                                    id: id.toString(),
+                                    name: "New Encounter",
+                                    turn: 0,
+                                };
+                                const newEncounters = this.state.encounters;
+                                newEncounters[id.toString()] = newEncounter;
+                                this.setState({
+                                    nextEncounterId: id,
+                                    encounters: newEncounters,
+                                    currentEncounterId: id.toString(),
+                                });
+                            }}
+                            changeCurrentEncounterId={(newEncounterId: string) =>
+                                this.setState({ currentEncounterId: newEncounterId })
+                            }
+                            changeUnitEncounterData={(unitEncounterData: Record<string, UnitEncounterData>) =>
+                                this.setState({ unitEncounterData })
+                            }
+                            changeUnits={(units: Record<string, UnitData>) => this.setState({ units })}
+                            changeEncounters={(encounters: Record<string, Encounter>) => this.setState({ encounters })}
+                            saveUnit={(unitId: string) => {
+                                const newUnits = this.state.units;
+                                newUnits[unitId].categoryId = this.state.currentCategoryId;
+                                this.setState({ units: newUnits });
+                            }}
+                        />
+                    </div>
+                    <div style={{ flexGrow: 1, flexBasis: 1 }}>
+                        <UnitPage
+                            categories={this.state.categories}
+                            currentCategoryId={this.state.currentCategoryId}
+                            units={this.state.units}
+                            getNextUnitId={this.getNextUnitId}
+                            getNextCategoryId={this.getNextCategoryId}
+                            changeCategoryId={(newCategoryId: string) =>
+                                this.setState({ currentCategoryId: newCategoryId })
+                            }
+                            changeUnits={(units: Record<string, UnitData>) => this.setState({ units })}
+                            changeCategories={(categories: Record<string, Category>) => this.setState({ categories })}
+                            deleteUnit={(unitId: string) => {
+                                const newUnitEncounterData = this.state.unitEncounterData;
+                                Object.keys(newUnitEncounterData)
+                                    .filter(
+                                        (unitEncounterDataId) =>
+                                            newUnitEncounterData[unitEncounterDataId].unitId === unitId,
+                                    )
+                                    .forEach((unitEncounterDataId) => delete newUnitEncounterData[unitEncounterDataId]);
+                                const newUnits = this.state.units;
+                                delete newUnits[unitId];
+                                this.setState({ units: newUnits, unitEncounterData: newUnitEncounterData });
+                            }}
+                            addUnitToEncounter={(unitId: string) => {
+                                const newEncounterData: UnitEncounterData = {
+                                    id: this.getNextUnitEncounterDataId(),
+                                    unitId,
+                                    encounterId: this.state.currentEncounterId,
+                                    heldTurn: false,
+                                    initiative: undefined,
+                                    hp: undefined,
+                                };
+                                const newUnitEncounterData = this.state.unitEncounterData;
+                                newUnitEncounterData[newEncounterData.id] = newEncounterData;
 
-                            this.setState({ unitEncounterData: newUnitEncounterData });
-                        }}
-                    />
+                                this.setState({ unitEncounterData: newUnitEncounterData });
+                            }}
+                        />
+                    </div>
                 </div>
+                <SaveIndicator state={this.state} />
             </div>
         );
     }
 }
 
-// TODO - handle no auth cookie
 const authCookie = getCookie("Auth");
 if (authCookie !== undefined) {
     APIHelper.getData().then(async (data) => {
