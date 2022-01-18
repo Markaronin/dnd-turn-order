@@ -39,7 +39,7 @@ export class APIHelper {
     private static handleFetch(url: string, options: RequestInit): Promise<any | UnsuccessfulRequest> {
         return fetch(`${APIHelper.baseUrl}/${url}`, {
             ...options,
-            headers: { ...options.headers, authorization: notUndefined(getCookie("Auth")) },
+            headers: { ...options.headers, authorization: `Bearer ${notUndefined(getCookie("Auth"))}` },
         })
             .then((response) => {
                 if (response.ok) {
